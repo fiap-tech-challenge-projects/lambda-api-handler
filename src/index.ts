@@ -3,8 +3,14 @@
 // =============================================================================
 
 // Export all handlers
-export { authHandler, emailLoginHandler, cpfLoginHandler, refreshTokenHandler, logoutHandler } from './handlers/auth.handler';
-export { authorizerHandler, validateTokenHandler } from './handlers/authorizer.handler';
+export {
+  authHandler,
+  emailLoginHandler,
+  cpfLoginHandler,
+  refreshTokenHandler,
+  logoutHandler,
+} from './handlers/auth.handler'
+export { authorizerHandler, validateTokenHandler } from './handlers/authorizer.handler'
 
 // Export types
-export * from './types';
+export * from './types'

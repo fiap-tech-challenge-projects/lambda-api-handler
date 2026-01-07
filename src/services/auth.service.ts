@@ -2,7 +2,9 @@
 // Authentication Service
 // =============================================================================
 
-import bcrypt from 'bcryptjs';
+import bcrypt from 'bcryptjs'
+
+import { AuthResponse, UserInfo, AuthError } from '../types'
 import {
   findUserByEmail,
   findUserById,
@@ -11,34 +13,32 @@ import {
   saveRefreshToken,
   findValidRefreshToken,
   revokeRefreshToken,
-} from '../utils/database';
+} from '../utils/database'
 import {
   generateAccessToken,
   generateRefreshToken,
   verifyRefreshToken,
   getAccessTokenExpiry,
-} from '../utils/jwt';
-import { AuthResponse, UserInfo, AuthError } from '../types';
+} from '../utils/jwt'
 
 /**
  * Login with email and password
+ * @param email
+ * @param password
  */
-export async function loginWithEmail(
-  email: string,
-  password: string
-): Promise<AuthResponse> {
+export async function loginWithEmail(email: string, password: string): Promise<AuthResponse> {
   // Find user by email
-  const user = await findUserByEmail(email);
+  const user = await findUserByEmail(email)
 
   if (!user) {
-    throw new AuthError('Invalid credentials', 401, 'INVALID_CREDENTIALS');
+    throw new AuthError('Invalid credentials', 401, 'INVALID_CREDENTIALS')
   }
 
   // Verify password
-  const isValidPassword = await bcrypt.compare(password, user.password_hash);
+  const isValidPassword = await bcrypt.compare(password, user.password_hash)
 
   if (!isValidPassword) {
-    throw new AuthError('Invalid credentials', 401, 'INVALID_CREDENTIALS');
+    throw new AuthError('Invalid credentials', 401, 'INVALID_CREDENTIALS')
   }
 
   // Generate tokens
@@ -47,15 +47,15 @@ export async function loginWithEmail(
     email: user.email,
     name: user.name,
     role: user.role,
-  };
+  }
 
-  const accessToken = await generateAccessToken(userInfo);
-  const { token: refreshToken, expiresAt } = await generateRefreshToken(user.id);
+  const accessToken = await generateAccessToken(userInfo)
+  const { token: refreshToken, expiresAt } = await generateRefreshToken(user.id)
 
   // Save refresh token
-  await saveRefreshToken(user.id, refreshToken, expiresAt);
+  await saveRefreshToken(user.id, refreshToken, expiresAt)
 
-  const expiresIn = await getAccessTokenExpiry();
+  const expiresIn = await getAccessTokenExpiry()
 
   return {
     accessToken,
@@ -63,25 +63,26 @@ export async function loginWithEmail(
     expiresIn,
     tokenType: 'Bearer',
     user: userInfo,
-  };
+  }
 }
 
 /**
  * Login with CPF (no password required for quick identification)
+ * @param cpf
  */
 export async function loginWithCpf(cpf: string): Promise<AuthResponse> {
   // Find client by CPF
-  const client = await findClientByCpf(cpf);
+  const client = await findClientByCpf(cpf)
 
   if (!client) {
-    throw new AuthError('CPF not found', 404, 'CPF_NOT_FOUND');
+    throw new AuthError('CPF not found', 404, 'CPF_NOT_FOUND')
   }
 
   // Find associated user
-  const user = await findUserByClientId(client.id);
+  const user = await findUserByClientId(client.id)
 
   if (!user) {
-    throw new AuthError('User not found for this CPF', 404, 'USER_NOT_FOUND');
+    throw new AuthError('User not found for this CPF', 404, 'USER_NOT_FOUND')
   }
 
   // Generate tokens
@@ -91,15 +92,15 @@ export async function loginWithCpf(cpf: string): Promise<AuthResponse> {
     name: user.name,
     role: user.role,
     clientId: client.id,
-  };
+  }
 
-  const accessToken = await generateAccessToken(userInfo);
-  const { token: refreshToken, expiresAt } = await generateRefreshToken(user.id);
+  const accessToken = await generateAccessToken(userInfo)
+  const { token: refreshToken, expiresAt } = await generateRefreshToken(user.id)
 
   // Save refresh token
-  await saveRefreshToken(user.id, refreshToken, expiresAt);
+  await saveRefreshToken(user.id, refreshToken, expiresAt)
 
-  const expiresIn = await getAccessTokenExpiry();
+  const expiresIn = await getAccessTokenExpiry()
 
   return {
     accessToken,
@@ -107,38 +108,33 @@ export async function loginWithCpf(cpf: string): Promise<AuthResponse> {
     expiresIn,
     tokenType: 'Bearer',
     user: userInfo,
-  };
+  }
 }
 
 /**
  * Refresh access token using refresh token
+ * @param refreshTokenStr
  */
-export async function refreshAccessToken(
-  refreshTokenStr: string
-): Promise<AuthResponse> {
+export async function refreshAccessToken(refreshTokenStr: string): Promise<AuthResponse> {
   // Verify refresh token JWT
-  const { sub: userId } = await verifyRefreshToken(refreshTokenStr);
+  const { sub: userId } = await verifyRefreshToken(refreshTokenStr)
 
   // Check if refresh token is valid in database
-  const tokenRecord = await findValidRefreshToken(refreshTokenStr);
+  const tokenRecord = await findValidRefreshToken(refreshTokenStr)
 
   if (!tokenRecord) {
-    throw new AuthError(
-      'Refresh token not found or expired',
-      401,
-      'INVALID_REFRESH_TOKEN'
-    );
+    throw new AuthError('Refresh token not found or expired', 401, 'INVALID_REFRESH_TOKEN')
   }
 
   // Find user
-  const user = await findUserById(userId);
+  const user = await findUserById(userId)
 
   if (!user) {
-    throw new AuthError('User not found', 404, 'USER_NOT_FOUND');
+    throw new AuthError('User not found', 404, 'USER_NOT_FOUND')
   }
 
   // Revoke old refresh token
-  await revokeRefreshToken(refreshTokenStr);
+  await revokeRefreshToken(refreshTokenStr)
 
   // Generate new tokens
   const userInfo: UserInfo = {
@@ -146,17 +142,15 @@ export async function refreshAccessToken(
     email: user.email,
     name: user.name,
     role: user.role,
-  };
+  }
 
-  const accessToken = await generateAccessToken(userInfo);
-  const { token: newRefreshToken, expiresAt } = await generateRefreshToken(
-    user.id
-  );
+  const accessToken = await generateAccessToken(userInfo)
+  const { token: newRefreshToken, expiresAt } = await generateRefreshToken(user.id)
 
   // Save new refresh token
-  await saveRefreshToken(user.id, newRefreshToken, expiresAt);
+  await saveRefreshToken(user.id, newRefreshToken, expiresAt)
 
-  const expiresIn = await getAccessTokenExpiry();
+  const expiresIn = await getAccessTokenExpiry()
 
   return {
     accessToken,
@@ -164,12 +158,13 @@ export async function refreshAccessToken(
     expiresIn,
     tokenType: 'Bearer',
     user: userInfo,
-  };
+  }
 }
 
 /**
  * Logout - revoke refresh token
+ * @param refreshTokenStr
  */
 export async function logout(refreshTokenStr: string): Promise<void> {
-  await revokeRefreshToken(refreshTokenStr);
+  await revokeRefreshToken(refreshTokenStr)
 }

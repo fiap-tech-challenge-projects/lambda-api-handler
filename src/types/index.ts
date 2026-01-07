@@ -7,32 +7,32 @@
 // -----------------------------------------------------------------------------
 
 export interface EmailLoginRequest {
-  email: string;
-  password: string;
+  email: string
+  password: string
 }
 
 export interface CpfLoginRequest {
-  cpf: string;
+  cpf: string
 }
 
 export interface RefreshTokenRequest {
-  refreshToken: string;
+  refreshToken: string
 }
 
 export interface AuthResponse {
-  accessToken: string;
-  refreshToken: string;
-  expiresIn: number;
-  tokenType: 'Bearer';
-  user: UserInfo;
+  accessToken: string
+  refreshToken: string
+  expiresIn: number
+  tokenType: 'Bearer'
+  user: UserInfo
 }
 
 export interface UserInfo {
-  id: string;
-  email: string;
-  name: string;
-  role: string;
-  clientId?: string;
+  id: string
+  email: string
+  name: string
+  role: string
+  clientId?: string
 }
 
 // -----------------------------------------------------------------------------
@@ -40,19 +40,19 @@ export interface UserInfo {
 // -----------------------------------------------------------------------------
 
 export interface JwtPayload {
-  sub: string;
-  email: string;
-  name: string;
-  role: string;
-  clientId?: string;
-  iat: number;
-  exp: number;
+  sub: string
+  email: string
+  name: string
+  role: string
+  clientId?: string
+  iat: number
+  exp: number
 }
 
 export interface JwtConfig {
-  secret: string;
-  accessTokenExpiry: string;
-  refreshTokenExpiry: string;
+  secret: string
+  accessTokenExpiry: string
+  refreshTokenExpiry: string
 }
 
 // -----------------------------------------------------------------------------
@@ -60,32 +60,32 @@ export interface JwtConfig {
 // -----------------------------------------------------------------------------
 
 export interface DbUser {
-  id: string;
-  email: string;
-  password_hash: string;
-  name: string;
-  role: string;
-  is_active: boolean;
-  created_at: Date;
-  updated_at: Date;
+  id: string
+  email: string
+  password_hash: string
+  name: string
+  role: string
+  is_active: boolean
+  created_at: Date
+  updated_at: Date
 }
 
 export interface DbClient {
-  id: string;
-  cpf_cnpj: string;
-  name: string;
-  email: string;
-  user_id: string;
-  created_at: Date;
+  id: string
+  cpf_cnpj: string
+  name: string
+  email: string
+  user_id: string
+  created_at: Date
 }
 
 export interface DbRefreshToken {
-  id: string;
-  token: string;
-  user_id: string;
-  expires_at: Date;
-  created_at: Date;
-  revoked_at?: Date;
+  id: string
+  token: string
+  user_id: string
+  expires_at: Date
+  created_at: Date
+  revoked_at?: Date
 }
 
 // -----------------------------------------------------------------------------
@@ -93,23 +93,23 @@ export interface DbRefreshToken {
 // -----------------------------------------------------------------------------
 
 export interface ApiGatewayAuthorizerEvent {
-  type: 'TOKEN' | 'REQUEST';
-  methodArn: string;
-  authorizationToken?: string;
-  headers?: Record<string, string>;
+  type: 'TOKEN' | 'REQUEST'
+  methodArn: string
+  authorizationToken?: string
+  headers?: Record<string, string>
 }
 
 export interface ApiGatewayAuthorizerResult {
-  principalId: string;
+  principalId: string
   policyDocument: {
-    Version: string;
+    Version: string
     Statement: Array<{
-      Action: string;
-      Effect: 'Allow' | 'Deny';
-      Resource: string;
-    }>;
-  };
-  context?: Record<string, string | number | boolean>;
+      Action: string
+      Effect: 'Allow' | 'Deny'
+      Resource: string
+    }>
+  }
+  context?: Record<string, string | number | boolean>
 }
 
 // -----------------------------------------------------------------------------
@@ -117,42 +117,60 @@ export interface ApiGatewayAuthorizerResult {
 // -----------------------------------------------------------------------------
 
 export interface DatabaseSecrets {
-  DATABASE_URL: string;
-  DB_HOST: string;
-  DB_PORT: string;
-  DB_NAME: string;
-  DB_USER: string;
-  DB_PASSWORD: string;
+  DATABASE_URL: string
+  DB_HOST: string
+  DB_PORT: string
+  DB_NAME: string
+  DB_USER: string
+  DB_PASSWORD: string
 }
 
 export interface AuthSecrets {
-  JWT_SECRET: string;
-  JWT_ACCESS_EXPIRY: string;
-  JWT_REFRESH_EXPIRY: string;
+  JWT_SECRET: string
+  JWT_ACCESS_EXPIRY: string
+  JWT_REFRESH_EXPIRY: string
 }
 
 // -----------------------------------------------------------------------------
 // Error Types
 // -----------------------------------------------------------------------------
 
+/**
+ *
+ */
 export class AuthError extends Error {
+  /**
+   *
+   * @param message
+   * @param statusCode
+   * @param code
+   */
   constructor(
     message: string,
     public statusCode: number = 401,
-    public code: string = 'AUTH_ERROR'
+    public code: string = 'AUTH_ERROR',
   ) {
-    super(message);
-    this.name = 'AuthError';
+    super(message)
+    this.name = 'AuthError'
   }
 }
 
+/**
+ *
+ */
 export class ValidationError extends Error {
+  /**
+   *
+   * @param message
+   * @param statusCode
+   * @param code
+   */
   constructor(
     message: string,
     public statusCode: number = 400,
-    public code: string = 'VALIDATION_ERROR'
+    public code: string = 'VALIDATION_ERROR',
   ) {
-    super(message);
-    this.name = 'ValidationError';
+    super(message)
+    this.name = 'ValidationError'
   }
 }

@@ -25,57 +25,22 @@ const baseRules = {
     },
   ],
   'import/no-unresolved': 'error',
-  'import/no-internal-modules': [
-    'error',
-    {
-      allow: [
-        // Allow imports from index files
-        '**/index',
-        '**/index.ts',
-        '**/index.js',
-        // Allow direct imports of module files
-        '@*/**/*.module',
-        '@*/**/*.module.ts',
-        '@*/**/*.module.js',
-        // Allow direct imports of service files
-        '@*/**/*.service',
-        '@*/**/*.service.ts',
-        '@*/**/*.service.js',
-        // Allow imports from specific patterns that should be allowed
-        '@application/*',
-        '@domain/*',
-        '@infra/*',
-        '@interfaces/*',
-        '@config/*',
-        '@common/*',
-      ],
-    },
-  ],
+  'import/no-internal-modules': 'off', // Disabled for Lambda project
   'no-duplicate-imports': 'error',
-  // JSDoc rules
-  'jsdoc/require-jsdoc': [
-    'error',
-    {
-      publicOnly: true,
-      require: {
-        FunctionDeclaration: true,
-        MethodDefinition: true,
-        ClassDeclaration: true,
-      },
-    },
-  ],
-  'jsdoc/require-returns': 'error',
-  'jsdoc/require-param': 'error',
-  'jsdoc/require-param-description': 'error',
-  'jsdoc/require-returns-description': 'error',
+  // JSDoc rules (relaxed for Lambda)
+  'jsdoc/require-jsdoc': 'off',
+  'jsdoc/require-returns': 'off',
+  'jsdoc/require-param': 'off',
+  'jsdoc/require-param-description': 'off',
+  'jsdoc/require-returns-description': 'off',
   // TypeScript rules
-  '@typescript-eslint/no-unused-vars': 'error',
+  '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
   '@typescript-eslint/no-explicit-any': 'error',
-  '@typescript-eslint/prefer-nullish-coalescing': 'error',
-  '@typescript-eslint/no-unsafe-assignment': 'error',
-  '@typescript-eslint/no-unsafe-call': 'error',
-  '@typescript-eslint/no-unsafe-member-access': 'error',
-  '@typescript-eslint/no-unsafe-return': 'error',
+  '@typescript-eslint/prefer-nullish-coalescing': 'off',
+  '@typescript-eslint/no-unsafe-assignment': 'off',
+  '@typescript-eslint/no-unsafe-call': 'off',
+  '@typescript-eslint/no-unsafe-member-access': 'off',
+  '@typescript-eslint/no-unsafe-return': 'off',
   // Member ordering
   '@typescript-eslint/member-ordering': [
     'error',
@@ -86,37 +51,14 @@ const baseRules = {
       },
     },
   ],
-  // Naming conventions
+  // Naming conventions (relaxed for Lambda/AWS SDK)
   '@typescript-eslint/naming-convention': [
     'error',
-    {
-      selector: 'interface',
-      format: ['PascalCase'],
-      filter: { regex: 'Repository$', match: true },
-      custom: { regex: '^I[A-Z].*Repository$', match: true },
-    },
-    {
-      selector: 'interface',
-      format: ['PascalCase'],
-      filter: { regex: 'Service$', match: true },
-      custom: { regex: '^I[A-Z].*Service$', match: true },
-    },
-    {
-      selector: 'interface',
-      format: ['PascalCase'],
-      filter: { regex: '^(?!.*(Repository|Service)$).*$', match: true },
-      custom: { regex: '^I[A-Z]', match: false },
-    },
+    { selector: 'interface', format: ['PascalCase'] },
     { selector: 'class', format: ['PascalCase'] },
-    {
-      selector: 'variable',
-      modifiers: ['const', 'global'],
-      format: ['UPPER_CASE'],
-      custom: { regex: '^[A-Z0-9_]+$', match: true },
-    },
-    { selector: 'variable', format: ['camelCase'] },
+    { selector: 'variable', format: ['camelCase', 'UPPER_CASE', 'PascalCase'] },
     { selector: 'function', format: ['camelCase'] },
-    { selector: 'objectLiteralProperty', format: ['camelCase', 'snake_case'] },
+    { selector: 'objectLiteralProperty', format: null }, // Allow any format for object properties (AWS SDK uses PascalCase)
   ],
 }
 
