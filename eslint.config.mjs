@@ -7,12 +7,8 @@ import eslintPluginImport from 'eslint-plugin-import'
 import eslintPluginJsdoc from 'eslint-plugin-jsdoc'
 import path from 'path'
 import { fileURLToPath } from 'url'
-import { createRequire } from 'module'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const require = createRequire(import.meta.url)
-
-const customRule = require('./scripts/eslint-rules/require-logger-in-catch.js')
 
 // Define base rules
 const baseRules = {
@@ -153,11 +149,6 @@ export default tseslint.config(
       '@typescript-eslint': tseslint.plugin,
       import: eslintPluginImport,
       jsdoc: eslintPluginJsdoc,
-      'require-logger-in-catch': {
-        rules: {
-          'require-logger-in-catch': customRule,
-        },
-      },
     },
     settings: {
       'import/resolver': {
@@ -169,7 +160,6 @@ export default tseslint.config(
     },
     rules: {
       ...baseRules,
-      'require-logger-in-catch/require-logger-in-catch': 'error',
     },
   },
   {
@@ -181,7 +171,6 @@ export default tseslint.config(
       'jsdoc/require-param': 'off',
       'jsdoc/require-param-description': 'off',
       'jsdoc/require-returns-description': 'off',
-      'require-logger-in-catch/require-logger-in-catch': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-unsafe-assignment': 'off',
       '@typescript-eslint/no-unsafe-call': 'off',
