@@ -19,7 +19,7 @@ terraform {
   }
 
   backend "s3" {
-    bucket         = "fiap-tech-challenge-terraform-state"
+    bucket         = "fiap-tech-challenge-tf-state-118735037876"
     key            = "lambda-api-handler/terraform.tfstate"
     region         = "us-east-1"
     encrypt        = true
