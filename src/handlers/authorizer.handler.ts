@@ -129,6 +129,7 @@ export async function authorizerHandler(
       name: decoded.name,
       role: decoded.role,
       ...(decoded.clientId && { clientId: decoded.clientId }),
+      ...(decoded.employeeId && { employeeId: decoded.employeeId }),
     })
   } catch (error) {
     console.error('Authorization failed:', error)
@@ -166,6 +167,7 @@ export async function validateTokenHandler(
         name: decoded.name,
         role: decoded.role,
         ...(decoded.clientId && { clientId: decoded.clientId }),
+        ...(decoded.employeeId && { employeeId: decoded.employeeId }),
       },
     }
   } catch (error) {

@@ -4,7 +4,7 @@
 
 import { Pool, PoolClient } from 'pg'
 
-import { DbUser, DbClient, DbRefreshToken } from '../types'
+import { DbUser, DbClient, DbEmployee, DbRefreshToken } from '../types'
 
 import { getDatabaseSecrets } from './secrets'
 
@@ -100,6 +100,29 @@ export async function findUserByClientId(clientId: string): Promise<DbUser | nul
     [clientId],
   )
   return users[0] || null
+}
+
+/**
+ * Find client by user ID
+ * @param userId
+ */
+export async function findClientByUserId(userId: string): Promise<DbClient | null> {
+  const clients = await query<DbClient>('SELECT * FROM "Client" WHERE user_id = $1 LIMIT 1', [
+    userId,
+  ])
+  return clients[0] || null
+}
+
+/**
+ * Find employee by user ID
+ * @param userId
+ */
+export async function findEmployeeByUserId(userId: string): Promise<DbEmployee | null> {
+  const employees = await query<DbEmployee>(
+    'SELECT * FROM "Employee" WHERE user_id = $1 AND is_active = true LIMIT 1',
+    [userId],
+  )
+  return employees[0] || null
 }
 
 /**

@@ -33,6 +33,7 @@ export interface UserInfo {
   name: string
   role: string
   clientId?: string
+  employeeId?: string
 }
 
 // -----------------------------------------------------------------------------
@@ -45,6 +46,7 @@ export interface JwtPayload {
   name: string
   role: string
   clientId?: string
+  employeeId?: string
   iat: number
   exp: number
 }
@@ -76,6 +78,16 @@ export interface DbClient {
   name: string
   email: string
   user_id: string
+  created_at: Date
+}
+
+export interface DbEmployee {
+  id: string
+  name: string
+  email: string
+  role: string
+  user_id: string
+  is_active: boolean
   created_at: Date
 }
 

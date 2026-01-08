@@ -21,6 +21,7 @@ export async function generateAccessToken(user: UserInfo): Promise<string> {
     name: user.name,
     role: user.role,
     ...(user.clientId && { clientId: user.clientId }),
+    ...(user.employeeId && { employeeId: user.employeeId }),
   }
 
   return jwt.sign(payload, secrets.JWT_SECRET, {

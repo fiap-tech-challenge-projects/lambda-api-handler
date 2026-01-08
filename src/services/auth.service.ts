@@ -10,6 +10,8 @@ import {
   findUserById,
   findClientByCpf,
   findUserByClientId,
+  findClientByUserId,
+  findEmployeeByUserId,
   saveRefreshToken,
   findValidRefreshToken,
   revokeRefreshToken,
@@ -41,12 +43,18 @@ export async function loginWithEmail(email: string, password: string): Promise<A
     throw new AuthError('Invalid credentials', 401, 'INVALID_CREDENTIALS')
   }
 
+  // Check for associated client or employee
+  const client = await findClientByUserId(user.id)
+  const employee = await findEmployeeByUserId(user.id)
+
   // Generate tokens
   const userInfo: UserInfo = {
     id: user.id,
     email: user.email,
     name: user.name,
     role: user.role,
+    ...(client && { clientId: client.id }),
+    ...(employee && { employeeId: employee.id }),
   }
 
   const accessToken = await generateAccessToken(userInfo)
@@ -85,6 +93,9 @@ export async function loginWithCpf(cpf: string): Promise<AuthResponse> {
     throw new AuthError('User not found for this CPF', 404, 'USER_NOT_FOUND')
   }
 
+  // Check for associated employee (rare but possible)
+  const employee = await findEmployeeByUserId(user.id)
+
   // Generate tokens
   const userInfo: UserInfo = {
     id: user.id,
@@ -92,6 +103,7 @@ export async function loginWithCpf(cpf: string): Promise<AuthResponse> {
     name: user.name,
     role: user.role,
     clientId: client.id,
+    ...(employee && { employeeId: employee.id }),
   }
 
   const accessToken = await generateAccessToken(userInfo)
@@ -133,6 +145,10 @@ export async function refreshAccessToken(refreshTokenStr: string): Promise<AuthR
     throw new AuthError('User not found', 404, 'USER_NOT_FOUND')
   }
 
+  // Check for associated client or employee
+  const client = await findClientByUserId(user.id)
+  const employee = await findEmployeeByUserId(user.id)
+
   // Revoke old refresh token
   await revokeRefreshToken(refreshTokenStr)
 
@@ -142,6 +158,8 @@ export async function refreshAccessToken(refreshTokenStr: string): Promise<AuthR
     email: user.email,
     name: user.name,
     role: user.role,
+    ...(client && { clientId: client.id }),
+    ...(employee && { employeeId: employee.id }),
   }
 
   const accessToken = await generateAccessToken(userInfo)
