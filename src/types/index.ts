@@ -19,6 +19,22 @@ export interface RefreshTokenRequest {
   refreshToken: string
 }
 
+// -----------------------------------------------------------------------------
+// Security Error Types
+// -----------------------------------------------------------------------------
+
+export class RateLimitError extends Error {
+  constructor(
+    message: string,
+    public statusCode: number = 429,
+    public code: string = 'RATE_LIMIT_EXCEEDED',
+    public retryAfter?: number,
+  ) {
+    super(message)
+    this.name = 'RateLimitError'
+  }
+}
+
 export interface AuthResponse {
   accessToken: string
   refreshToken: string

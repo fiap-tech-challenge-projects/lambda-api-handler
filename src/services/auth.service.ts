@@ -33,10 +33,13 @@ export async function loginWithEmail(email: string, password: string): Promise<A
   const user = await findUserByEmail(email)
 
   if (!user) {
+    // Use timing-safe comparison to prevent timing attacks
+    // Hash a dummy password to maintain consistent timing
+    await bcrypt.compare(password, '$2a$10$dummyhashfortimingatttackprevention00000000000000000')
     throw new AuthError('Invalid credentials', 401, 'INVALID_CREDENTIALS')
   }
 
-  // Verify password
+  // Verify password with constant time comparison
   const isValidPassword = await bcrypt.compare(password, user.password_hash)
 
   if (!isValidPassword) {

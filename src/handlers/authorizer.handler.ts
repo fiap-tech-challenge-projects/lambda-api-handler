@@ -93,8 +93,6 @@ export async function authorizerHandler(
   event: APIGatewayAuthorizerEvent,
   _context: Context,
 ): Promise<APIGatewayAuthorizerResult> {
-  console.log('Authorizer event:', JSON.stringify(event, null, 2))
-
   try {
     // Get token from event
     let token: string | null = null
@@ -109,14 +107,11 @@ export async function authorizerHandler(
     }
 
     if (!token) {
-      console.log('No token provided')
       throw new Error('Unauthorized')
     }
 
     // Verify token
     const decoded: JwtPayload = await verifyAccessToken(token)
-
-    console.log('Token verified for user:', decoded.sub)
 
     // Generate allow policy with user context
     const methodArn = event.methodArn

@@ -66,8 +66,22 @@ export async function generateRefreshToken(userId: string): Promise<{
 export async function verifyAccessToken(token: string): Promise<JwtPayload> {
   const secrets = await getAuthSecrets()
 
+  // Additional token format validation
+  if (!token || token.length > 2048) {
+    throw new AuthError('Invalid token format', 401, 'INVALID_TOKEN')
+  }
+
   try {
-    const decoded = jwt.verify(token, secrets.JWT_SECRET) as JwtPayload
+    const decoded = jwt.verify(token, secrets.JWT_SECRET, {
+      algorithms: ['HS256'], // Explicitly specify allowed algorithms
+      clockTolerance: 0, // No clock tolerance for security
+    }) as JwtPayload
+
+    // Validate payload structure
+    if (!decoded.sub || !decoded.email || !decoded.role) {
+      throw new AuthError('Invalid token payload', 401, 'INVALID_TOKEN')
+    }
+
     return decoded
   } catch (error) {
     if (error instanceof jwt.TokenExpiredError) {
@@ -75,6 +89,9 @@ export async function verifyAccessToken(token: string): Promise<JwtPayload> {
     }
     if (error instanceof jwt.JsonWebTokenError) {
       throw new AuthError('Invalid token', 401, 'INVALID_TOKEN')
+    }
+    if (error instanceof AuthError) {
+      throw error
     }
     throw new AuthError('Token verification failed', 401, 'TOKEN_ERROR')
   }
@@ -87,14 +104,26 @@ export async function verifyAccessToken(token: string): Promise<JwtPayload> {
 export async function verifyRefreshToken(token: string): Promise<{ sub: string }> {
   const secrets = await getAuthSecrets()
 
+  // Additional token format validation
+  if (!token || token.length > 2048) {
+    throw new AuthError('Invalid token format', 401, 'INVALID_REFRESH_TOKEN')
+  }
+
   try {
-    const decoded = jwt.verify(token, secrets.JWT_SECRET) as {
+    const decoded = jwt.verify(token, secrets.JWT_SECRET, {
+      algorithms: ['HS256'], // Explicitly specify allowed algorithms
+      clockTolerance: 0, // No clock tolerance for security
+    }) as {
       sub: string
       type: string
     }
 
     if (decoded.type !== 'refresh') {
       throw new AuthError('Invalid token type', 401, 'INVALID_TOKEN_TYPE')
+    }
+
+    if (!decoded.sub) {
+      throw new AuthError('Invalid token payload', 401, 'INVALID_REFRESH_TOKEN')
     }
 
     return { sub: decoded.sub }
@@ -104,6 +133,9 @@ export async function verifyRefreshToken(token: string): Promise<{ sub: string }
     }
     if (error instanceof jwt.TokenExpiredError) {
       throw new AuthError('Refresh token expired', 401, 'REFRESH_TOKEN_EXPIRED')
+    }
+    if (error instanceof jwt.JsonWebTokenError) {
+      throw new AuthError('Invalid refresh token', 401, 'INVALID_REFRESH_TOKEN')
     }
     throw new AuthError('Invalid refresh token', 401, 'INVALID_REFRESH_TOKEN')
   }

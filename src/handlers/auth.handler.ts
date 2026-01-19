@@ -5,7 +5,8 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda'
 
 import { loginWithEmail, loginWithCpf, refreshAccessToken, logout } from '../services/auth.service'
-import { AuthError, ValidationError } from '../types'
+import { AuthError, ValidationError, RateLimitError } from '../types'
+import { isRateLimited, getResetTime } from '../utils/rate-limiter'
 import {
   validateEmailLoginRequest,
   validateCpfLoginRequest,
@@ -23,12 +24,27 @@ function createResponse(
   body: unknown,
   headers?: Record<string, string>,
 ): APIGatewayProxyResult {
+  // Get allowed origins from environment variable or use default
+  const allowedOrigins = process.env.ALLOWED_ORIGINS
+    ? process.env.ALLOWED_ORIGINS.split(',')
+    : ['https://fiap-tech-challenge.com']
+
+  // Default to first allowed origin if not specified
+  const origin = allowedOrigins[0]
+
   return {
     statusCode,
     headers: {
       'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Origin': origin,
       'Access-Control-Allow-Credentials': 'true',
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      'Access-Control-Max-Age': '86400', // 24 hours
+      'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
+      'X-Content-Type-Options': 'nosniff',
+      'X-Frame-Options': 'DENY',
+      'X-XSS-Protection': '1; mode=block',
       ...headers,
     },
     body: JSON.stringify(body),
@@ -40,7 +56,27 @@ function createResponse(
  * @param error
  */
 function handleError(error: unknown): APIGatewayProxyResult {
-  console.error('Error:', error)
+  // Log error without sensitive details
+  if (error instanceof Error) {
+    console.error('Error type:', error.constructor.name, 'Message:', error.message)
+  } else {
+    console.error('Unknown error type')
+  }
+
+  if (error instanceof RateLimitError) {
+    const headers: Record<string, string> = {}
+    if (error.retryAfter) {
+      headers['Retry-After'] = Math.ceil(error.retryAfter / 1000).toString()
+    }
+    return createResponse(
+      error.statusCode,
+      {
+        error: error.code,
+        message: error.message,
+      },
+      headers,
+    )
+  }
 
   if (error instanceof AuthError) {
     return createResponse(error.statusCode, {
@@ -80,6 +116,20 @@ function parseBody(event: APIGatewayProxyEvent): unknown {
 }
 
 /**
+ * Get client identifier for rate limiting
+ * @param event
+ */
+function getClientIdentifier(event: APIGatewayProxyEvent): string {
+  // Prefer source IP from requestContext
+  const sourceIp =
+    event.requestContext?.identity?.sourceIp ||
+    event.headers?.['X-Forwarded-For']?.split(',')[0] ||
+    'unknown'
+
+  return sourceIp
+}
+
+/**
  * Email Login Handler
  * POST /auth/login
  * @param event
@@ -90,6 +140,19 @@ export async function emailLoginHandler(
   _context: Context,
 ): Promise<APIGatewayProxyResult> {
   try {
+    // Rate limiting check
+    const clientId = getClientIdentifier(event)
+    if (isRateLimited(clientId)) {
+      const resetTime = getResetTime(clientId)
+      const retryAfter = resetTime ? resetTime - Date.now() : undefined
+      throw new RateLimitError(
+        'Too many login attempts. Please try again later.',
+        429,
+        'RATE_LIMIT_EXCEEDED',
+        retryAfter,
+      )
+    }
+
     const body = parseBody(event)
     const { email, password } = validateEmailLoginRequest(body)
 
@@ -112,6 +175,19 @@ export async function cpfLoginHandler(
   _context: Context,
 ): Promise<APIGatewayProxyResult> {
   try {
+    // Rate limiting check
+    const clientId = getClientIdentifier(event)
+    if (isRateLimited(clientId)) {
+      const resetTime = getResetTime(clientId)
+      const retryAfter = resetTime ? resetTime - Date.now() : undefined
+      throw new RateLimitError(
+        'Too many login attempts. Please try again later.',
+        429,
+        'RATE_LIMIT_EXCEEDED',
+        retryAfter,
+      )
+    }
+
     const body = parseBody(event)
     const { cpf } = validateCpfLoginRequest(body)
 
