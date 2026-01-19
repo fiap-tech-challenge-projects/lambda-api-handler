@@ -86,6 +86,12 @@ variable "lambda_reserved_concurrency" {
 # API Gateway Configuration
 # -----------------------------------------------------------------------------
 
+variable "allowed_origins" {
+  description = "Origens permitidas para CORS (domínios específicos para produção)"
+  type        = list(string)
+  default     = ["https://fiap-tech-challenge.com", "https://app.fiap-tech-challenge.com"]
+}
+
 variable "api_gateway_stage_name" {
   description = "Nome do stage do API Gateway"
   type        = string
@@ -93,15 +99,15 @@ variable "api_gateway_stage_name" {
 }
 
 variable "api_gateway_throttling_rate_limit" {
-  description = "Rate limit do API Gateway (requests/segundo)"
+  description = "Rate limit do API Gateway (requests/segundo) - Reduzido para endpoints de autenticação"
   type        = number
-  default     = 100
+  default     = 10 # Reduced from 100 for auth endpoints
 }
 
 variable "api_gateway_throttling_burst_limit" {
   description = "Burst limit do API Gateway"
   type        = number
-  default     = 200
+  default     = 20 # Reduced from 200 for auth endpoints
 }
 
 # -----------------------------------------------------------------------------

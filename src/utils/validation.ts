@@ -6,10 +6,19 @@ import { ValidationError } from '../types'
 
 /**
  * Validate email format
+ * ReDoS-safe implementation with length check and simplified regex
  * @param email
  */
 export function validateEmail(email: string): boolean {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  // Prevent ReDoS by limiting email length
+  if (!email || email.length > 254) {
+    return false
+  }
+
+  // Simple, ReDoS-safe regex with atomic grouping concept
+  // Matches: localpart@domain.tld
+  const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/
+
   return emailRegex.test(email)
 }
 
