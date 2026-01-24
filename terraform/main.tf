@@ -18,8 +18,8 @@ terraform {
     }
   }
 
+  # Backend S3 - bucket configured dynamically via terraform init -backend-config
   backend "s3" {
-    bucket         = "fiap-tech-challenge-tf-state-118735037876"
     key            = "lambda-api-handler/terraform.tfstate"
     region         = "us-east-1"
     encrypt        = true
