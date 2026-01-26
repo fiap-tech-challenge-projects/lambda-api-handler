@@ -67,7 +67,9 @@ resource "aws_iam_policy" "secrets_access" {
     ]
   })
 
-  tags = var.common_tags
+  # AWS Academy: Cannot tag IAM policies (iam:TagPolicy not allowed)
+  # Explicitly set tags to empty map to override provider default_tags
+  tags = {}
 }
 
 resource "aws_iam_role_policy_attachment" "lambda_secrets" {
