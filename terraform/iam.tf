@@ -22,7 +22,8 @@ resource "aws_iam_role" "lambda_execution" {
     ]
   })
 
-  tags = var.common_tags
+  # AWS Academy: Cannot tag IAM roles (iam:TagPolicy not allowed)
+  tags = {}
 }
 
 # -----------------------------------------------------------------------------
@@ -97,7 +98,8 @@ resource "aws_iam_role" "authorizer_execution" {
     ]
   })
 
-  tags = var.common_tags
+  # AWS Academy: Cannot tag IAM roles (iam:TagPolicy not allowed)
+  tags = {}
 }
 
 resource "aws_iam_role_policy_attachment" "authorizer_logs" {
