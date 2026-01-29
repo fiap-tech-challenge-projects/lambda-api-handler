@@ -79,9 +79,9 @@ locals {
   function_name_prefix = "${var.project_name}-${var.environment}"
 
   lambda_env_vars = {
-    NODE_ENV              = var.environment
-    AWS_REGION            = var.aws_region
-    DATABASE_SECRET_NAME  = "${var.project_name}/${var.environment}/database/credentials"
-    AUTH_SECRET_NAME      = "${var.project_name}/${var.environment}/auth/config"
+    NODE_ENV             = var.environment
+    AWS_REGION           = var.aws_region
+    DATABASE_SECRET_NAME = "${var.project_name}/${var.environment}/database/credentials"
+    AUTH_SECRET_NAME     = "${var.project_name}/${var.environment}/auth/config"
   }
 }

@@ -98,7 +98,7 @@ output "auth_endpoints" {
 
 output "summary" {
   description = "Resumo da infraestrutura"
-  value = <<-EOT
+  value       = <<-EOT
     ================================================================================
     FIAP Tech Challenge - Lambda API Handler
     ================================================================================

@@ -29,10 +29,10 @@ resource "aws_apigatewayv2_api" "main" {
 # -----------------------------------------------------------------------------
 
 resource "aws_apigatewayv2_authorizer" "jwt" {
-  api_id           = aws_apigatewayv2_api.main.id
-  authorizer_type  = "REQUEST"
-  name             = "jwt-authorizer"
-  authorizer_uri   = aws_lambda_function.authorizer.invoke_arn
+  api_id          = aws_apigatewayv2_api.main.id
+  authorizer_type = "REQUEST"
+  name            = "jwt-authorizer"
+  authorizer_uri  = aws_lambda_function.authorizer.invoke_arn
 
   authorizer_payload_format_version = "2.0"
   authorizer_result_ttl_in_seconds  = 300 # Cache authorizer results for 5 min
@@ -113,23 +113,23 @@ resource "aws_apigatewayv2_stage" "main" {
 
   # SECURITY: Throttling limits to prevent abuse
   default_route_settings {
-    throttling_rate_limit  = var.api_gateway_throttling_rate_limit
-    throttling_burst_limit = var.api_gateway_throttling_burst_limit
+    throttling_rate_limit    = var.api_gateway_throttling_rate_limit
+    throttling_burst_limit   = var.api_gateway_throttling_burst_limit
     detailed_metrics_enabled = true
-    logging_level           = "INFO"
+    logging_level            = "INFO"
   }
 
   access_log_settings {
     destination_arn = aws_cloudwatch_log_group.api_gateway.arn
     format = jsonencode({
-      requestId      = "$context.requestId"
-      ip             = "$context.identity.sourceIp"
-      requestTime    = "$context.requestTime"
-      httpMethod     = "$context.httpMethod"
-      routeKey       = "$context.routeKey"
-      status         = "$context.status"
-      responseLength = "$context.responseLength"
-      errorMessage   = "$context.error.message"
+      requestId        = "$context.requestId"
+      ip               = "$context.identity.sourceIp"
+      requestTime      = "$context.requestTime"
+      httpMethod       = "$context.httpMethod"
+      routeKey         = "$context.routeKey"
+      status           = "$context.status"
+      responseLength   = "$context.responseLength"
+      errorMessage     = "$context.error.message"
       integrationError = "$context.integrationErrorMessage"
     })
   }
