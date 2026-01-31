@@ -68,7 +68,7 @@ data "aws_subnets" "private" {
 }
 
 data "aws_security_group" "lambda_rds" {
-  name = "${var.project_name}-lambda-rds-sg-${var.environment}"
+  name = "${var.project_name}-${var.environment}-lambda-rds-sg"
 }
 
 # -----------------------------------------------------------------------------
