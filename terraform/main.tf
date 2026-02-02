@@ -68,7 +68,7 @@ data "aws_subnets" "private" {
 }
 
 data "aws_security_group" "lambda_rds" {
-  name = "${var.project_name}-lambda-rds-sg-${var.environment}"
+  name = "${var.project_name}-${var.environment}-lambda-rds-sg"
 }
 
 # -----------------------------------------------------------------------------
@@ -79,8 +79,8 @@ locals {
   function_name_prefix = "${var.project_name}-${var.environment}"
 
   lambda_env_vars = {
-    NODE_ENV             = var.environment
-    AWS_REGION           = var.aws_region
+    NODE_ENV = var.environment
+    # AWS_REGION is automatically provided by Lambda runtime - cannot be overridden
     DATABASE_SECRET_NAME = "${var.project_name}/${var.environment}/database/credentials"
     AUTH_SECRET_NAME     = "${var.project_name}/${var.environment}/auth/config"
   }
