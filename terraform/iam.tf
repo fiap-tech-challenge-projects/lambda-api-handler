@@ -49,7 +49,7 @@ resource "aws_iam_role_policy_attachment" "lambda_vpc" {
 # -----------------------------------------------------------------------------
 
 resource "aws_iam_policy" "secrets_access" {
-  name        = "${local.function_name_prefix}-secrets-access"
+  name        = "${local.function_name_prefix}-lambda-secrets-access"
   description = "Allow Lambda to access Secrets Manager"
 
   policy = jsonencode({
