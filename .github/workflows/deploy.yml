@@ -75,7 +75,23 @@ jobs:
 
       - name: Package Lambda
         run: |
-          cd dist
+          # Create a clean package directory
+          mkdir -p package
+
+          # Copy compiled code
+          cp -r dist/* package/
+
+          # Copy package.json and package-lock.json
+          cp package.json package/
+          cp package-lock.json package/ 2>/dev/null || true
+
+          # Install production dependencies
+          cd package
+          npm install --omit=dev
+          cd ..
+
+          # Create zip file
+          cd package
           zip -r ../lambda.zip .
           cd ..
 
