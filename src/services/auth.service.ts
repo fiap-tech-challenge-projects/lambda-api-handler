@@ -40,7 +40,7 @@ export async function loginWithEmail(email: string, password: string): Promise<A
   }
 
   // Verify password with constant time comparison
-  const isValidPassword = await bcrypt.compare(password, user.password_hash)
+  const isValidPassword = await bcrypt.compare(password, user.password)
 
   if (!isValidPassword) {
     throw new AuthError('Invalid credentials', 401, 'INVALID_CREDENTIALS')
@@ -50,11 +50,14 @@ export async function loginWithEmail(email: string, password: string): Promise<A
   const client = await findClientByUserId(user.id)
   const employee = await findEmployeeByUserId(user.id)
 
+  // Get name from client or employee (User model doesn't have name field)
+  const name = client?.name || employee?.name || user.email
+
   // Generate tokens
   const userInfo: UserInfo = {
     id: user.id,
     email: user.email,
-    name: user.name,
+    name,
     role: user.role,
     ...(client && { clientId: client.id }),
     ...(employee && { employeeId: employee.id }),
@@ -99,11 +102,14 @@ export async function loginWithCpf(cpf: string): Promise<AuthResponse> {
   // Check for associated employee (rare but possible)
   const employee = await findEmployeeByUserId(user.id)
 
+  // Get name from client or employee (User model doesn't have name field)
+  const name = client.name || employee?.name || user.email
+
   // Generate tokens
   const userInfo: UserInfo = {
     id: user.id,
     email: user.email,
-    name: user.name,
+    name,
     role: user.role,
     clientId: client.id,
     ...(employee && { employeeId: employee.id }),
@@ -152,6 +158,9 @@ export async function refreshAccessToken(refreshTokenStr: string): Promise<AuthR
   const client = await findClientByUserId(user.id)
   const employee = await findEmployeeByUserId(user.id)
 
+  // Get name from client or employee (User model doesn't have name field)
+  const name = client?.name || employee?.name || user.email
+
   // Revoke old refresh token
   await revokeRefreshToken(refreshTokenStr)
 
@@ -159,7 +168,7 @@ export async function refreshAccessToken(refreshTokenStr: string): Promise<AuthR
   const userInfo: UserInfo = {
     id: user.id,
     email: user.email,
-    name: user.name,
+    name,
     role: user.role,
     ...(client && { clientId: client.id }),
     ...(employee && { employeeId: employee.id }),

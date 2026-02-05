@@ -55,7 +55,7 @@ export async function getClient(): Promise<PoolClient> {
  */
 export async function findUserByEmail(email: string): Promise<DbUser | null> {
   const users = await query<DbUser>(
-    'SELECT * FROM "User" WHERE email = $1 AND is_active = true LIMIT 1',
+    'SELECT * FROM "users" WHERE email = $1 AND "isActive" = true LIMIT 1',
     [email],
   )
   return users[0] || null
@@ -67,7 +67,7 @@ export async function findUserByEmail(email: string): Promise<DbUser | null> {
  */
 export async function findUserById(id: string): Promise<DbUser | null> {
   const users = await query<DbUser>(
-    'SELECT * FROM "User" WHERE id = $1 AND is_active = true LIMIT 1',
+    'SELECT * FROM "users" WHERE id = $1 AND "isActive" = true LIMIT 1',
     [id],
   )
   return users[0] || null
@@ -81,7 +81,7 @@ export async function findClientByCpf(cpf: string): Promise<DbClient | null> {
   // Normalize CPF (remove formatting)
   const normalizedCpf = cpf.replace(/\D/g, '')
 
-  const clients = await query<DbClient>('SELECT * FROM "Client" WHERE cpf_cnpj = $1 LIMIT 1', [
+  const clients = await query<DbClient>('SELECT * FROM "clients" WHERE "cpfCnpj" = $1 LIMIT 1', [
     normalizedCpf,
   ])
   return clients[0] || null
@@ -93,9 +93,8 @@ export async function findClientByCpf(cpf: string): Promise<DbClient | null> {
  */
 export async function findUserByClientId(clientId: string): Promise<DbUser | null> {
   const users = await query<DbUser>(
-    `SELECT u.* FROM "User" u
-     INNER JOIN "Client" c ON c.user_id = u.id
-     WHERE c.id = $1 AND u.is_active = true
+    `SELECT u.* FROM "users" u
+     WHERE u."clientId" = $1 AND u."isActive" = true
      LIMIT 1`,
     [clientId],
   )
@@ -107,9 +106,13 @@ export async function findUserByClientId(clientId: string): Promise<DbUser | nul
  * @param userId
  */
 export async function findClientByUserId(userId: string): Promise<DbClient | null> {
-  const clients = await query<DbClient>('SELECT * FROM "Client" WHERE user_id = $1 LIMIT 1', [
-    userId,
-  ])
+  const clients = await query<DbClient>(
+    `SELECT c.* FROM "clients" c
+     INNER JOIN "users" u ON u."clientId" = c.id
+     WHERE u.id = $1
+     LIMIT 1`,
+    [userId],
+  )
   return clients[0] || null
 }
 
@@ -119,7 +122,10 @@ export async function findClientByUserId(userId: string): Promise<DbClient | nul
  */
 export async function findEmployeeByUserId(userId: string): Promise<DbEmployee | null> {
   const employees = await query<DbEmployee>(
-    'SELECT * FROM "Employee" WHERE user_id = $1 AND is_active = true LIMIT 1',
+    `SELECT e.* FROM "employees" e
+     INNER JOIN "users" u ON u."employeeId" = e.id
+     WHERE u.id = $1 AND e."isActive" = true
+     LIMIT 1`,
     [userId],
   )
   return employees[0] || null
@@ -137,7 +143,7 @@ export async function saveRefreshToken(
   expiresAt: Date,
 ): Promise<void> {
   await query(
-    `INSERT INTO "RefreshToken" (id, token, user_id, expires_at, created_at)
+    `INSERT INTO "refresh_tokens" (id, token, "userId", "expiresAt", "createdAt")
      VALUES (gen_random_uuid(), $1, $2, $3, NOW())`,
     [token, userId, expiresAt],
   )
@@ -149,10 +155,9 @@ export async function saveRefreshToken(
  */
 export async function findValidRefreshToken(token: string): Promise<DbRefreshToken | null> {
   const tokens = await query<DbRefreshToken>(
-    `SELECT * FROM "RefreshToken"
+    `SELECT * FROM "refresh_tokens"
      WHERE token = $1
-       AND expires_at > NOW()
-       AND revoked_at IS NULL
+       AND "expiresAt" > NOW()
      LIMIT 1`,
     [token],
   )
@@ -160,22 +165,19 @@ export async function findValidRefreshToken(token: string): Promise<DbRefreshTok
 }
 
 /**
- * Revoke refresh token
+ * Revoke refresh token (deletes it since schema has no revoked_at field)
  * @param token
  */
 export async function revokeRefreshToken(token: string): Promise<void> {
-  await query('UPDATE "RefreshToken" SET revoked_at = NOW() WHERE token = $1', [token])
+  await query('DELETE FROM "refresh_tokens" WHERE token = $1', [token])
 }
 
 /**
- * Revoke all user refresh tokens
+ * Revoke all user refresh tokens (deletes them since schema has no revoked_at field)
  * @param userId
  */
 export async function revokeAllUserTokens(userId: string): Promise<void> {
-  await query(
-    'UPDATE "RefreshToken" SET revoked_at = NOW() WHERE user_id = $1 AND revoked_at IS NULL',
-    [userId],
-  )
+  await query('DELETE FROM "refresh_tokens" WHERE "userId" = $1', [userId])
 }
 
 /**

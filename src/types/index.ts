@@ -80,40 +80,45 @@ export interface JwtConfig {
 export interface DbUser {
   id: string
   email: string
-  password_hash: string
-  name: string
+  password: string
   role: string
-  is_active: boolean
-  created_at: Date
-  updated_at: Date
+  isActive: boolean
+  lastLoginAt: Date | null
+  createdAt: Date
+  updatedAt: Date
+  clientId: string | null
+  employeeId: string | null
 }
 
 export interface DbClient {
   id: string
-  cpf_cnpj: string
   name: string
   email: string
-  user_id: string
-  created_at: Date
+  phone: string | null
+  cpfCnpj: string
+  address: string | null
+  createdAt: Date
+  updatedAt: Date
 }
 
 export interface DbEmployee {
   id: string
   name: string
   email: string
+  phone: string | null
   role: string
-  user_id: string
-  is_active: boolean
-  created_at: Date
+  specialty: string | null
+  isActive: boolean
+  createdAt: Date
+  updatedAt: Date
 }
 
 export interface DbRefreshToken {
   id: string
   token: string
-  user_id: string
-  expires_at: Date
-  created_at: Date
-  revoked_at?: Date
+  userId: string
+  expiresAt: Date
+  createdAt: Date
 }
 
 // -----------------------------------------------------------------------------
