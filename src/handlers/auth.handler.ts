@@ -253,10 +253,30 @@ export async function authHandler(
   event: APIGatewayProxyEvent,
   context: Context,
 ): Promise<APIGatewayProxyResult> {
-  const path = event.path || event.requestContext?.path || ''
-  const method = event.httpMethod || event.requestContext?.httpMethod || ''
+  // Support both API Gateway REST API (v1) and HTTP API (v2) formats
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const eventAny = event as any
+  const path = event.path || eventAny.rawPath || event.requestContext?.path || ''
+  const method =
+    event.httpMethod ||
+    eventAny.requestContext?.http?.method ||
+    event.requestContext?.httpMethod ||
+    ''
 
   console.log(`Auth Handler: ${method} ${path}`)
+  console.log(
+    'Event structure:',
+    JSON.stringify(
+      {
+        path: event.path,
+        rawPath: eventAny.rawPath,
+        httpMethod: event.httpMethod,
+        requestContext: event.requestContext,
+      },
+      null,
+      2,
+    ),
+  )
 
   // Handle CORS preflight
   if (method === 'OPTIONS') {
