@@ -43,12 +43,12 @@ Este repositorio contem as Lambda functions para autenticacao da aplicacao, incl
 
 ## Endpoints
 
-| Metodo | Endpoint | Descricao | Auth |
-|--------|----------|-----------|------|
-| POST | `/auth/login` | Login com email/senha | Nao |
-| POST | `/auth/login/cpf` | Login com CPF | Nao |
-| POST | `/auth/refresh` | Renovar access token | Nao |
-| POST | `/auth/logout` | Invalidar refresh token | Nao |
+| Metodo | Endpoint          | Descricao               | Auth |
+| ------ | ----------------- | ----------------------- | ---- |
+| POST   | `/auth/login`     | Login com email/senha   | Nao  |
+| POST   | `/auth/login/cpf` | Login com CPF           | Nao  |
+| POST   | `/auth/refresh`   | Renovar access token    | Nao  |
+| POST   | `/auth/logout`    | Invalidar refresh token | Nao  |
 
 ### Exemplos de Request
 
@@ -103,14 +103,14 @@ curl -X POST https://xxx.execute-api.us-east-1.amazonaws.com/v1/auth/refresh \
 
 ## Tecnologias
 
-| Tecnologia | Versao | Descricao |
-|------------|--------|-----------|
-| Node.js | 20.x | Runtime |
-| TypeScript | 5.x | Linguagem |
-| AWS Lambda | - | Serverless compute |
-| API Gateway | HTTP API | API management |
-| PostgreSQL | 15.x | Database (RDS) |
-| JWT | - | Autenticacao |
+| Tecnologia  | Versao   | Descricao          |
+| ----------- | -------- | ------------------ |
+| Node.js     | 20.x     | Runtime            |
+| TypeScript  | 5.x      | Linguagem          |
+| AWS Lambda  | -        | Serverless compute |
+| API Gateway | HTTP API | API management     |
+| PostgreSQL  | 15.x     | Database (RDS)     |
+| JWT         | -        | Autenticacao       |
 
 ## Pre-requisitos
 
@@ -152,6 +152,7 @@ npm run lint:fix
 ### Via CI/CD (Recomendado)
 
 O deploy automatico ocorre via GitHub Actions quando:
+
 - Push na branch `main` ou `develop`
 - Mudancas nos arquivos `src/**`, `terraform/**`, ou `package.json`
 
@@ -212,12 +213,12 @@ lambda-api-handler/
 
 ## Variaveis de Ambiente (Lambda)
 
-| Variavel | Descricao |
-|----------|-----------|
-| `NODE_ENV` | Ambiente (development/staging/production) |
-| `AWS_REGION` | Regiao AWS |
+| Variavel               | Descricao                            |
+| ---------------------- | ------------------------------------ |
+| `NODE_ENV`             | Ambiente (development/production)    |
+| `AWS_REGION`           | Regiao AWS                           |
 | `DATABASE_SECRET_NAME` | Nome do secret com credenciais do DB |
-| `AUTH_SECRET_NAME` | Nome do secret com configuracao JWT |
+| `AUTH_SECRET_NAME`     | Nome do secret com configuracao JWT  |
 
 ## Secrets Manager
 
